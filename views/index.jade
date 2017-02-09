@@ -1,0 +1,24 @@
+extends layout
+
+block content
+	.color-background#all-colors
+		each color, i in flossColors
+			.color-swatch(
+				id="color-swatch-#{i}"
+				style="background-color: ##{color.hexValue};"
+			)
+				.details
+					p #{color.description}
+					p DMC: #{color.dmc}
+					p Anchor: #{color.anchor}
+					button.add-to-color-scheme(id="#{color._id}") Add
+	.color-background#results
+	content
+		header
+			h1= title
+		form#search-form
+			select#search-field
+				option(value='dmc') DMC
+				option(value='anchor') Anchor
+				option(value='description') Name
+			input#search-text(placeholder="Search for an embroidery floss color")

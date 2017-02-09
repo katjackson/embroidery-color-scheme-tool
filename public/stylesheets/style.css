@@ -1,0 +1,49 @@
+body {
+	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+	margin: 0;
+	height: 100vh;
+}
+
+.color-background {
+	display: flex;
+	flex-wrap: wrap;
+	height: 100%;
+}
+
+.color-swatch {
+	min-height: 75px;
+	min-width: 75px;
+	flex: 1 0 75px;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.color-background#results {
+	display: none;
+}
+.color-background#results .color-swatch{
+	flex-basis: 200px;
+}
+
+content {
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+header {
+	padding: 30px 50px 0 50px;
+}
+
+form {
+	margin: 50px;
+}
+form input {
+	margin: 15px;
+	padding: 5px;
+	width: 500px;
+}
+form select {
+	margin: 15px;
+}
