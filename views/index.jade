@@ -1,24 +1,27 @@
 extends layout
 
 block content
-	.color-background#all-colors
-		each color, i in flossColors
-			.color-swatch(
-				id="color-swatch-#{i}"
-				style="background-color: ##{color.hexValue};"
-			)
-				.details
-					p #{color.description}
-					p DMC: #{color.dmc}
-					p Anchor: #{color.anchor}
-					button.add-to-color-scheme(id="#{color._id}") Add
-	.color-background#results
 	content
-		header
-			h1= title
 		form#search-form
 			select#search-field
 				option(value='dmc') DMC
 				option(value='anchor') Anchor
 				option(value='description') Name
 			input#search-text(placeholder="Search for an embroidery floss color")
+	.color-background#all-colors
+		each color in flossColors
+			.color-swatch(
+				id="color-swatch-#{color._id}"
+				style="background-color: ##{color.hexValue};"
+			)
+				.details
+					p #{color.description}
+					p DMC: #{color.dmc}
+					p Anchor: #{color.anchor}
+					if color.isInColorScheme
+						button.hidden.add-to-color-scheme(data-color-id="#{color._id}" id="add-#{color._id}") Add
+						button.remove-from-color-scheme(data-color-id="#{color._id}" id="remove-#{color._id}") Remove
+					else
+						button.add-to-color-scheme(data-color-id="#{color._id}" id= "add-#{color._id}") Add
+						button.hidden.remove-from-color-scheme(data-color-id="#{color._id}" id= "remove-#{color._id}") Remove
+	.color-background#results

@@ -1,0 +1,20 @@
+extends layout
+
+block content
+	button.clear-color-scheme Clear Color Scheme
+	if flossColors.length
+		.color-background#color-scheme
+			each color in flossColors
+				.color-swatch(
+					id="color-swatch-#{color._id}"
+					style="background-color: ##{color.hexValue};"
+				)
+					.details
+						p #{color.description}
+						p DMC: #{color.dmc}
+						p Anchor: #{color.anchor}
+						button.hidden.add-to-color-scheme(data-color-id="#{color._id}" id="add-#{color._id}") Add
+						button.remove-from-color-scheme(data-color-id="#{color._id}" id="remove-#{color._id}") Remove
+						button.get-cousin-colors(data-color-id="#{color._id}") Get Cousins
+	else
+		h3 You haven't added any colors to your color scheme yet.

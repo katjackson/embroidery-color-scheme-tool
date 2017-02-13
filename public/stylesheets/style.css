@@ -7,38 +7,29 @@ body {
 .color-background {
 	display: flex;
 	flex-wrap: wrap;
-	height: 100%;
+	height: 86%;
 }
 
 .color-swatch {
 	min-height: 75px;
 	min-width: 75px;
-	flex: 1 0 75px;
+	flex: 1 0 200px;
 	display: flex;
-    justify-content: center;
-    align-items: center;
+	justify-content: center;
+	align-items: center;
 }
 
 .color-background#results {
 	display: none;
 }
-.color-background#results .color-swatch{
-	flex-basis: 200px;
+.color-background#all-colors .color-swatch {
+	flex-basis: 75px;
 }
 
-content {
-	position: absolute;
-	top: 0;
-	width: 100%;
+.hidden {
+	display: none;
 }
 
-header {
-	padding: 30px 50px 0 50px;
-}
-
-form {
-	margin: 50px;
-}
 form input {
 	margin: 15px;
 	padding: 5px;
