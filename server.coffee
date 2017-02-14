@@ -49,3 +49,5 @@ server.on('listening', onListening)
 
 # Run data migration
 importData()
+
+module.export = server

@@ -38,3 +38,7 @@ form input {
 form select {
 	margin: 15px;
 }
+
+button.clear-color-scheme {
+	float: right;
+}

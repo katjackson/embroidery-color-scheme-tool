@@ -8,11 +8,12 @@ block content
 				option(value='anchor') Anchor
 				option(value='description') Name
 			input#search-text(placeholder="Search for an embroidery floss color")
+	button.clear-color-scheme.hidden Clear Color Scheme
 	.color-background#all-colors
 		each color in flossColors
 			.color-swatch(
 				id="color-swatch-#{color._id}"
-				style="background-color: ##{color.hexValue};"
+				style="background-color: ##{color.hexValue}"
 			)
 				.details
 					p #{color.description}
@@ -24,4 +25,5 @@ block content
 					else
 						button.add-to-color-scheme(data-color-id="#{color._id}" id= "add-#{color._id}") Add
 						button.hidden.remove-from-color-scheme(data-color-id="#{color._id}" id= "remove-#{color._id}") Remove
+					button.see-cousin-colors(data-color-id="#{color._id}") See Cousins
 	.color-background#results
