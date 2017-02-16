@@ -48,15 +48,16 @@ router.get '/scheme', (request, response, next) ->
 
 router.get '/cousins', (request, response, next) ->
 	flossColors = request.db.get('flossColors')
-	flossColors.findOne(request.query).then((flossColor) =>
-		if !flossColor?
-			return []
-		else if flossColor.cousins?.length
-			return flossColor.cousins
-		else
-			return findCousinColors(flossColors, flossColor)
-	).then((data) =>
-		response.json(data)
-	)
+	flossColors.findOne(request.query)
+		.then((flossColor) =>
+			if !flossColor?
+				return []
+			else if flossColor.cousins?.length
+				return [flossColor].concat(flossColor.cousins)
+			else
+				return findCousinColors(flossColors, flossColor)
+		).then((data) =>
+			response.json(data)
+		)
 
 module.exports = router

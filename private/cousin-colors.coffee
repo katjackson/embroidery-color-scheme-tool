@@ -35,7 +35,7 @@ findCousinColors = (flossColors, flossColor) ->
 
 		flossColors.update(flossColor, { $set: { cousins: cousinColors } })
 
-		cousinColors
+		[flossColor].concat(cousinColors)
 	)
 
 module.exports = {

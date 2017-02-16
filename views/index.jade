@@ -1,15 +1,16 @@
 extends layout
 
 block content
-	content
+	.top-content
 		form#search-form
 			select#search-field
 				option(value='dmc') DMC
 				option(value='anchor') Anchor
 				option(value='description') Name
 			input#search-text(placeholder="Search for an embroidery floss color")
-	button.clear-color-scheme.hidden Clear Color Scheme
-	.color-background#all-colors
+		button.btn.btn-default.clear-color-scheme.hidden Clear Color Scheme
+		//- span.error.hidden
+	.color-background#all-colors(class=flossColors.length > 0 ? "" : "hidden")
 		each color in flossColors
 			.color-swatch(
 				id="color-swatch-#{color._id}"
@@ -19,11 +20,43 @@ block content
 					p #{color.description}
 					p DMC: #{color.dmc}
 					p Anchor: #{color.anchor}
-					if color.isInColorScheme
-						button.hidden.add-to-color-scheme(data-color-id="#{color._id}" id="add-#{color._id}") Add
-						button.remove-from-color-scheme(data-color-id="#{color._id}" id="remove-#{color._id}") Remove
-					else
-						button.add-to-color-scheme(data-color-id="#{color._id}" id= "add-#{color._id}") Add
-						button.hidden.remove-from-color-scheme(data-color-id="#{color._id}" id= "remove-#{color._id}") Remove
-					button.see-cousin-colors(data-color-id="#{color._id}") See Cousins
-	.color-background#results
+					//- if color.isInColorScheme
+					//- 	button.btn.btn-default.hidden.add-to-color-scheme(data-color-id="#{color._id}" id="add-#{color._id}") Add
+					//- 	button.btn.btn-default.remove-from-color-scheme(data-color-id="#{color._id}" id="remove-#{color._id}") Remove
+					//- else
+					//- 	button.btn.btn-default.add-to-color-scheme(data-color-id="#{color._id}" id= "add-#{color._id}") Add
+					//- 	button.btn.btn-default.hidden.remove-from-color-scheme(data-color-id="#{color._id}" id= "remove-#{color._id}") Remove
+					//- button.btn.btn-default.see-cousin-colors(data-color-id="#{color._id}") See Cousins
+	.color-background#results(class=flossColorsResults.length > 0 ? "" : "hidden")
+		each color in flossColorsResults
+			.color-swatch(
+				id="color-swatch-#{color._id}"
+				style="background-color: ##{color.hexValue}"
+			)
+				.details
+					p #{color.description}
+					p DMC: #{color.dmc}
+					p Anchor: #{color.anchor}
+					button.btn.btn-default.add-to-color-scheme(
+						class=color.isInColorScheme ? "hidden" : ""
+						data-color-id="#{color._id}"
+						id="add-#{color._id}"
+						title="Add to color scheme"
+					)
+						| Add
+					button.btn.btn-default.remove-from-color-scheme(
+						class=color.isInColorScheme ? "" : "hidden"
+						data-color-id="#{color._id}"
+						id="remove-#{color._id}"
+						title="Remove from color scheme"
+					)
+						| Remove
+					button.btn.btn-default.see-cousin-colors(
+						data-color-id="#{color._id}"
+						title="Find closest embroidery floss colors"
+					)
+						| Closest Colors
+	.empty-background.hidden#color-scheme
+		h3 You haven't added any colors to your color scheme yet.
+	.empty-background.hidden#search-results
+		h3 Your search did not match any floss colors.

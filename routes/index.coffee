@@ -7,60 +7,88 @@ randomstring = require 'randomstring'
 createAndStoreSessionVariable = (db) ->
 	sessions = db.get('sessions')
 	sessionId = randomstring.generate()
-	console.log "using session id #{sessionId}"
-	sessions.insert({sessionId, timestamp: new Date()})
+	console.log "Using session id #{sessionId}"
+	sessions.insert({ sessionId, timestamp: new Date() })
 	sessionId
+
+getFlossColorsWithInColorSchemeProperty = (flossColorDocuments, colorScheme) =>
+	if colorScheme?
+		colorSchemeIds = colorScheme.flossColors.map( (colorId) -> colorId.toString() )
+		flossColorDocuments = flossColorDocuments.map( (doc) ->
+			doc.isInColorScheme = doc._id.toString() in colorSchemeIds
+			return doc
+		)
+	return flossColorDocuments
 
 router.get '/', (request, response, next) ->
 	unless request.session.id?
 		request.session.id = createAndStoreSessionVariable(request.db)
-	console.log "session: ", request.session
-	console.log "cookies: ", request.cookies
 
-	data = {}
 	flossColors = request.db.get('flossColors')
 	colorSchemes = request.db.get('colorSchemes')
+	data = {
+		flossColors: []
+		flossColorsResults: []
+	}
 	query = getFlossColorMongoQuery(request.query)
-	flossColors.find(query).then((flossColorDocuments) =>
+
+	flossColors.find(query).then((flossColorSearchResults) =>
 		colorSchemes.findOne({ sessionId: request.session.id }).then((colorScheme) =>
-			if colorScheme?
-				colorSchemeIds = colorScheme.flossColors.map( (colorId) -> colorId.toString() )
-				flossColorDocuments = flossColorDocuments.map( (doc) ->
-					doc.isInColorScheme = doc._id.toString() in colorSchemeIds
-					return doc
-				)
-			return flossColorDocuments
+			getFlossColorsWithInColorSchemeProperty(flossColorSearchResults, colorScheme)
 		).then((flossColorDocuments) =>
-			data.flossColors = flossColorDocuments
+			if flossColorDocuments.length > 20
+				data.flossColors = flossColorDocuments
+			else
+				data.flossColorsResults = flossColorDocuments
 			response.render('index', data)
 		)
-	)
+	).catch((error) => console.error error)
 
 router.get '/cousins', (request, response, next) ->
 	flossColors = request.db.get('flossColors')
+	colorSchemes = request.db.get('colorSchemes')
+	sessionId = request.session.id
+	data = {
+		flossColors: []
+		flossColorsResults: []
+	}
+
 	flossColors.findOne(request.query).then((flossColor) =>
 		if !flossColor?
 			return []
 		else if flossColor.cousins?.length
-			return flossColor.cousins
+			return [flossColor].concat(flossColor.cousins)
 		else
 			return findCousinColors(flossColors, flossColor)
 	).then((flossColorDocuments) =>
-		response.render('index', { flossColors: flossColorDocuments })
-	)
+		colorSchemes.findOne({ sessionId }).then((colorScheme) =>
+			getFlossColorsWithInColorSchemeProperty(flossColorDocuments, colorScheme)
+		).then((flossColorsToDisplay) =>
+			data.flossColorsResults = flossColorsToDisplay
+			response.render('index', data)
+		)
+	).catch((error) => console.error error)
 
 router.get '/color-scheme', (request, response, next) ->
 	colorSchemes = request.db.get('colorSchemes')
 	flossColors = request.db.get('flossColors')
 	sessionId = request.session.id
+	data = {
+		flossColors: []
+		flossColorsResults: []
+	}
+
 	if !sessionId?
 		response.render('color-scheme', { flossColors: [] })
-	colorSchemes.findOne({ sessionId })
-		.then((colorScheme) =>
-			flossColors.find({ _id: { $in: colorScheme?.flossColors } })
-		).then((docs) ->
-			docs ?= []
-			response.render('color-scheme', { flossColors: docs })
+	colorSchemes.findOne({ sessionId }).then((colorScheme) =>
+		flossColors.find({ _id: { $in: colorScheme?.flossColors } })
+	).then((docs) ->
+		docs ?= []
+		data.flossColorsResults = docs.map((doc) ->
+			doc.isInColorScheme = true
+			return doc
 		)
+		response.render('index', data)
+	).catch((error) => console.error error)
 
 module.exports = router

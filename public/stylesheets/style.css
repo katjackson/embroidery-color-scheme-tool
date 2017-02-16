@@ -19,26 +19,66 @@ body {
 	align-items: center;
 }
 
-.color-background#results {
-	display: none;
+.details {
+	text-align: center;
+	padding: 15px;
 }
+
+.details p {
+	color: white;
+	text-shadow:
+		-0.5px -0.5px 0.5px #888888,
+		0.5px -0.5px 0.5px #888888,
+		-0.5px 0.5px 0.5px #888888,
+		1px 1px 0.5px #888888;
+}
+
+.details button {
+	width: 115px;
+	padding: 6px 3px;
+	margin: 7px;
+}
+
 .color-background#all-colors .color-swatch {
 	flex-basis: 75px;
+}
+
+.color-background#all-colors button {
+	white-space: normal;
 }
 
 .hidden {
 	display: none;
 }
 
-form input {
-	margin: 15px;
-	padding: 5px;
-	width: 500px;
-}
-form select {
+.top-content {
+	display: flex;
 	margin: 15px;
 }
 
+form {
+	flex: 5;
+	display: flex;
+}
+
+form input {
+	margin: 15px;
+	padding: 5px;
+	flex: 2;
+	/*width: 500px;*/
+}
+form select {
+	margin: 15px;
+	margin-bottom: 5px;
+}
+
+.error {
+	margin-left: 115px;
+	color: red;
+	font-size: 10px;
+}
+
 button.clear-color-scheme {
-	float: right;
+	flex: 1;
+	/*float: right;*/
 }
