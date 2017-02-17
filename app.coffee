@@ -31,10 +31,10 @@ app.use( (request, response, next) =>
 )
 
 app.use(session(
-  cookieName: 'session'
-  secret: 'jp0Y6uMYk8RRUv74uiuFi6jisPdhJ9mE'
-  duration: 60 * 60 * 1000
-  activeDuration: 30 * 60 * 1000
+	cookieName: 'session'
+	secret: 'jp0Y6uMYk8RRUv74uiuFi6jisPdhJ9mE'
+	duration: 60 * 60 * 1000
+	activeDuration: 30 * 60 * 1000
 ))
 
 app.use('/', index)

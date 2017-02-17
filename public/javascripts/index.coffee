@@ -12,7 +12,6 @@ getFlossColors = ({ input, field }, handleData) ->
 	)
 
 getColorSchemeData = (handleData) ->
-	console.log 'get scheme data'
 	$.ajax(
 		url: api + '/scheme'
 		type: 'GET'
@@ -35,7 +34,6 @@ removeColorFromColorScheme = (flossColorId) ->
 	)
 
 clearColorScheme = ->
-	console.log 'post clear'
 	$.ajax(
 		url: api + '/scheme' + '?action=clear'
 		type: 'POST'
@@ -43,7 +41,7 @@ clearColorScheme = ->
 
 getCousinColors = (flossColorId, handleData) ->
 	$.ajax(
-		url: api + '/cousins' + "?_id=#{flossColorId}"
+		url: api + '/colors/' + flossColorId + '/cousins'
 		type: 'GET'
 		success: (flossColors) ->
 			handleData(flossColors)
@@ -52,6 +50,14 @@ getCousinColors = (flossColorId, handleData) ->
 restoreSearchInput = ({ input, field })->
 	$('#search-text').val(input)
 	$('#search-field').val(field)
+
+showHideDetailsButton = ->
+	$('.show-details').addClass('hidden')
+	$('.hide-details').removeClass('hidden')
+
+showShowDetailsButton = ->
+	$('.show-details').removeClass('hidden')
+	$('.hide-details').addClass('hidden')
 
 switchShowHideDetailsButton = ->
 	$('.show-hide-details').toggleClass('hidden')
@@ -81,16 +87,14 @@ showAllColorsBackground = ->
 	clearResultsBackground()
 
 createColorSwatch = (id, flossColor, isFlossColorInColorScheme) ->
+	addButtonHiddenClass = if isFlossColorInColorScheme then 'hidden' else ''
+	removeButtonHiddenClass = if !isFlossColorInColorScheme then 'hidden' else ''
 	colorSwatch = $("<div class='color-swatch' id='color-swatch-#{flossColor._id}' style='background-color: ##{flossColor.hexValue};'>")
 	$details = $("<div class='details'>")
 	$details.append(
 		$("<p>").text(flossColor.description)
 		$("<p>").text("DMC: #{flossColor.dmc}")
 		$("<p>").text("Anchor: #{flossColor.anchor}")
-	)
-	addButtonHiddenClass = if isFlossColorInColorScheme then 'hidden' else ''
-	removeButtonHiddenClass = if !isFlossColorInColorScheme then 'hidden' else ''
-	$details.append(
 		$("<button>", {
 			'class': "btn btn-default add-to-color-scheme #{addButtonHiddenClass}"
 			'data-color-id': "#{flossColor._id}"
@@ -109,7 +113,6 @@ createColorSwatch = (id, flossColor, isFlossColorInColorScheme) ->
 			'title': "Find closest embroidery floss colors"
 		}).text("Closest Colors")
 	)
-
 	colorSwatch.append($details)
 	colorSwatch
 
@@ -138,6 +141,7 @@ displayResults = (flossColors) ->
 	if flossColors.length
 		fillResultsBackground(flossColors)
 		showResultsBackground()
+		showHideDetailsButton()
 	else
 		showAllColorsBackground()
 
@@ -198,20 +202,29 @@ $(document.body).on('click', '.clear-color-scheme', (event) ->
 $(document.body).on('click', '.see-cousin-colors', (event) ->
 	flossColorId = $(event.target).data('colorId')
 	getAndDisplayCousinColors(flossColorId)
-	history.pushState({ flossColorId, page: 'cousins' }, null, "/cousins?_id=#{flossColorId}")
+	history.pushState({ flossColorId, page: 'cousins' }, null, "/#{flossColorId}/cousins")
 )
 
 isValidSearchInput = ({ input, field }) ->
-	return false unless input?
+	return false unless input? && input != ''
 	if field == 'dmc' or field == 'anchor'
 		return false unless parseInt(input) >= 0
+	currentQuery = window.location.search
+	if currentQuery? && currentQuery != ''
+		currentSearchValues = getSearchValuesFromQueryString(currentQuery)
+		if currentSearchValues.input == input && currentSearchValues.field == field
+			return false
 	return true
 
-showFormError = ->
-	$('.error').text('Please enter a number').removeClass('hidden')
+showFormError = (field) ->
+	errors =
+		'dmc': "Please enter a number."
+		'anchor': "Please enter a number."
+		'description': "Please enter a search term."
+	$('.error').text(errors[field])
 
 hideFormError = ->
-	$('.error').text('').addClass('hidden')
+	$('.error').text('')
 
 clearFormInput = ->
 	$('form#search-form')[0].reset()
@@ -226,15 +239,17 @@ $('form#search-form').submit( (event, other) ->
 		getAndDisplaySearchResults({ input, field })
 		history.pushState({ input, field, page: 'results' }, null, "/?#{field}=#{input}")
 	else
-		showFormError()
+		showFormError(field)
 )
 
-getSearchQuery = (search) ->
+getSearchValuesFromQueryString = (search) ->
 	regExpForField = /\?(.*)\=/
 	regExpForInput = /\=(.*)$/
 	field = regExpForField.exec(search)[1]
 	input = regExpForInput.exec(search)[1]
-	if field == '_id'
+	if input == ''
+		return {}
+	else if field == '_id'
 		return { flossColorId: input }
 	else
 		return { input, field }
@@ -246,7 +261,8 @@ $(document).ready(() ->
 	page = window.location.pathname.replace('/', '')
 	search = window.location.search
 	if search? && search != ''
-		{ input, field, flossColorId } = getSearchQuery(search)
+		{ input, field, flossColorId } = getSearchValuesFromQueryString(search)
+	console.log { input, field, flossColorId, page }
 	history.replaceState({ input, field, flossColorId, page }, null, null)
 
 	showClearColorSchemeButton() if page == 'color-scheme'
@@ -259,7 +275,8 @@ window.onpopstate = (event) ->
 		getColorSchemeData((flossColors) ->
 			displayResults(flossColors)
 		)
-	else if page == 'cousins'
+	else if page.endsWith('cousins')
+		flossColorId = page.split('/cousins')[0]
 		getCousinColors(flossColorId, (flossColors) ->
 			displayResults(flossColors)
 		)

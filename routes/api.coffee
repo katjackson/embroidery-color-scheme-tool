@@ -10,6 +10,27 @@ router.get '/colors', (request, response, next) ->
 		response.json(data)
 	)
 
+router.get '/colors/:_id', (request, response, next) ->
+	flossColors = request.db.get('flossColors')
+	_id = request.params._id
+	flossColors.find({_id}).then((data) =>
+		response.json(data)
+	)
+
+router.get '/colors/:_id/cousins', (request, response, next) ->
+	flossColors = request.db.get('flossColors')
+	_id = request.params._id
+	flossColors.findOne({_id}).then((flossColor) =>
+		if !flossColor?
+			return []
+		else if flossColor.cousins?.length
+			return [flossColor].concat(flossColor.cousins)
+		else
+			return findCousinColors(flossColors, flossColor)
+	).then((data) =>
+		response.json(data)
+	)
+
 router.post '/scheme', (request, response, next) ->
 	colorSchemes = request.db.get('colorSchemes')
 	flossColors = request.db.get('flossColors')
@@ -34,30 +55,16 @@ router.get '/scheme', (request, response, next) ->
 	flossColors = request.db.get('flossColors')
 	sessionId = request.session.id
 	if !sessionId?
-		response.render('color-scheme', { flossColors: [] })
-
-	colorSchemes.findOne({ sessionId })
-		.then((colorScheme) =>
-			if !colorScheme?.flossColors?.length
-				return []
-			else
-				return flossColors.find({ _id: { $in: colorScheme?.flossColors } })
-		).then((data) =>
-			response.json(data)
-		)
-
-router.get '/cousins', (request, response, next) ->
-	flossColors = request.db.get('flossColors')
-	flossColors.findOne(request.query)
-		.then((flossColor) =>
-			if !flossColor?
-				return []
-			else if flossColor.cousins?.length
-				return [flossColor].concat(flossColor.cousins)
-			else
-				return findCousinColors(flossColors, flossColor)
-		).then((data) =>
-			response.json(data)
-		)
+		response.json([])
+	else
+		colorSchemes.findOne({ sessionId })
+			.then((colorScheme) =>
+				if !colorScheme?.flossColors?.length
+					return []
+				else
+					return flossColors.find({ _id: { $in: colorScheme?.flossColors } })
+			).then((data) =>
+				response.json(data)
+			)
 
 module.exports = router

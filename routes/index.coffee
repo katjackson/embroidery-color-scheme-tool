@@ -36,24 +36,27 @@ router.get '/', (request, response, next) ->
 		colorSchemes.findOne({ sessionId: request.session.id }).then((colorScheme) =>
 			getFlossColorsWithInColorSchemeProperty(flossColorSearchResults, colorScheme)
 		).then((flossColorDocuments) =>
-			if flossColorDocuments.length > 20
+			if flossColorDocuments.length == 454
 				data.flossColors = flossColorDocuments
+			else if flossColorDocuments.length == 0
+				data.noResults = true
 			else
 				data.flossColorsResults = flossColorDocuments
 			response.render('index', data)
 		)
 	).catch((error) => console.error error)
 
-router.get '/cousins', (request, response, next) ->
+router.get '/:_id/cousins', (request, response, next) ->
 	flossColors = request.db.get('flossColors')
 	colorSchemes = request.db.get('colorSchemes')
 	sessionId = request.session.id
+	_id = request.params._id
 	data = {
 		flossColors: []
 		flossColorsResults: []
 	}
 
-	flossColors.findOne(request.query).then((flossColor) =>
+	flossColors.findOne({_id}).then((flossColor) =>
 		if !flossColor?
 			return []
 		else if flossColor.cousins?.length
@@ -79,16 +82,23 @@ router.get '/color-scheme', (request, response, next) ->
 	}
 
 	if !sessionId?
-		response.render('color-scheme', { flossColors: [] })
-	colorSchemes.findOne({ sessionId }).then((colorScheme) =>
-		flossColors.find({ _id: { $in: colorScheme?.flossColors } })
-	).then((docs) ->
-		docs ?= []
-		data.flossColorsResults = docs.map((doc) ->
-			doc.isInColorScheme = true
-			return doc
-		)
+		data.colorSchemeIsEmpty = true
 		response.render('index', data)
-	).catch((error) => console.error error)
+	else
+		colorSchemes.findOne({ sessionId }).then((colorScheme) =>
+			if colorScheme?
+				return flossColors.find({ _id: { $in: colorScheme?.flossColors } })
+			else
+				return []
+		).then((docs) ->
+			if docs.length == 0
+				data.colorSchemeIsEmpty = true
+			else
+				data.flossColorsResults = docs.map((doc) ->
+					doc.isInColorScheme = true
+					return doc
+				)
+			response.render('index', data)
+		).catch((error) => console.error error)
 
 module.exports = router
