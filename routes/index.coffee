@@ -11,14 +11,13 @@ createAndStoreSessionVariable = (db) ->
 	sessions.insert({ sessionId, timestamp: new Date() })
 	sessionId
 
-getFlossColorsWithInColorSchemeProperty = (flossColorDocuments, colorScheme) =>
-	if colorScheme?
-		colorSchemeIds = colorScheme.flossColors.map( (colorId) -> colorId.toString() )
-		flossColorDocuments = flossColorDocuments.map( (doc) ->
-			doc.isInColorScheme = doc._id.toString() in colorSchemeIds
-			return doc
-		)
-	return flossColorDocuments
+addInColorSchemePropertyToFlossColors = (flossColorDocuments, colorScheme) =>
+	colorSchemeIds = colorScheme.flossColors.map( (colorId) -> colorId.toString() )
+	flossColorDocuments = flossColorDocuments.map( (doc) ->
+		doc.isInColorScheme = doc._id.toString() in colorSchemeIds
+		return doc
+	)
+	flossColorDocuments
 
 router.get '/', (request, response, next) ->
 	unless request.session.id?
@@ -34,7 +33,10 @@ router.get '/', (request, response, next) ->
 
 	flossColors.find(query).then((flossColorSearchResults) =>
 		colorSchemes.findOne({ sessionId: request.session.id }).then((colorScheme) =>
-			getFlossColorsWithInColorSchemeProperty(flossColorSearchResults, colorScheme)
+			if colorScheme?
+				addInColorSchemePropertyToFlossColors(flossColorSearchResults, colorScheme)
+			else
+				return flossColorSearchResults
 		).then((flossColorDocuments) =>
 			if flossColorDocuments.length == 454
 				data.flossColors = flossColorDocuments
@@ -46,7 +48,33 @@ router.get '/', (request, response, next) ->
 		)
 	).catch((error) => console.error error)
 
-router.get '/:_id/cousins', (request, response, next) ->
+router.get '/colors/:_id', (request, response, next) ->
+	flossColors = request.db.get('flossColors')
+	colorSchemes = request.db.get('colorSchemes')
+	sessionId = request.session.id
+	_id = request.params._id
+	data = {
+		flossColors: []
+		flossColorsResults: []
+	}
+
+	flossColors.find({_id}).then((flossColorSearchResults) =>
+		colorSchemes.findOne({ sessionId }).then((colorScheme) =>
+			if colorScheme?
+				addInColorSchemePropertyToFlossColors(flossColorSearchResults, colorScheme)
+			else
+				return flossColorSearchResults
+		).then((flossColorDocuments) =>
+			if flossColorDocuments.length == 0
+				data.noResults = true
+			else
+				data.flossColorsResults = flossColorDocuments
+			response.render('index', data)
+		)
+	).catch((error) => console.error error)
+
+
+router.get '/cousins/:_id', (request, response, next) ->
 	flossColors = request.db.get('flossColors')
 	colorSchemes = request.db.get('colorSchemes')
 	sessionId = request.session.id
@@ -65,7 +93,10 @@ router.get '/:_id/cousins', (request, response, next) ->
 			return findCousinColors(flossColors, flossColor)
 	).then((flossColorDocuments) =>
 		colorSchemes.findOne({ sessionId }).then((colorScheme) =>
-			getFlossColorsWithInColorSchemeProperty(flossColorDocuments, colorScheme)
+			if colorScheme?
+				addInColorSchemePropertyToFlossColors(flossColorDocuments, colorScheme)
+			else
+				return flossColorDocuments
 		).then((flossColorsToDisplay) =>
 			data.flossColorsResults = flossColorsToDisplay
 			response.render('index', data)
@@ -80,7 +111,6 @@ router.get '/color-scheme', (request, response, next) ->
 		flossColors: []
 		flossColorsResults: []
 	}
-
 	if !sessionId?
 		data.colorSchemeIsEmpty = true
 		response.render('index', data)

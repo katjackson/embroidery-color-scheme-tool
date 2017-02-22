@@ -13,8 +13,9 @@ block content
 		button.btn.btn-default.clear-color-scheme.hidden Clear Color Scheme
 	.color-background#all-colors(class=flossColors.length > 0 ? "" : "hidden")
 		each color in flossColors
-			.color-swatch(
+			.color-swatch.small(
 				id="color-swatch-#{color._id}"
+				data-color-id="#{color._id}"
 				style="background-color: ##{color.hexValue}"
 			)
 				.details.hidden
@@ -22,14 +23,16 @@ block content
 					p Anchor: #{color.anchor}
 	.color-background#results(class=flossColorsResults.length > 0 ? "" : "hidden")
 		each color in flossColorsResults
-			.color-swatch(
+			.color-swatch.large(
 				id="color-swatch-#{color._id}"
+				data-color-id="#{color._id}"
 				style="background-color: ##{color.hexValue}"
 			)
 				.details
-					p #{color.description}
-					p DMC: #{color.dmc}
-					p Anchor: #{color.anchor}
+					.text
+						p #{color.description}
+						p DMC: #{color.dmc}
+						p Anchor: #{color.anchor}
 					button.btn.btn-default.add-to-color-scheme(
 						class=color.isInColorScheme ? "hidden" : ""
 						data-color-id="#{color._id}"
