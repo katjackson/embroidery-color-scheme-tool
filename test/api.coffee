@@ -17,6 +17,7 @@ describe('/GET floss colors', () =>
 				response.body.should.be.a 'array'
 				response.body.length.should.be.eql 454
 			).then(done())
+			.catch((error) => console.error error)
 	)
 )
 
@@ -32,27 +33,30 @@ describe('/GET floss color by DMC', () =>
 					.that.deep.equals('967')
 				expect(obj).to.contain.all.keys([_id, dmc, anchor, description, hexValue])
 			).then(done())
+			.catch((error) => console.error error)
 	)
 )
 
 describe('/GET color cousins from new calculation', () =>
 	it('should GET closest colors from new calculation', (done) =>
+		flossColorId = '589e049c40dad83122a9f6d5'
 		chai.request(app)
-			.get('/api/cousins?_id=589e049c40dad83122a9f6d5', (err, response) =>
+			.get("/api/colors/#{flossColorId}/cousins", (err, response) =>
 				response.should.have.status 200
 				response.body.should.be.a 'array'
 				response.body.length.should.be.eql 5
 			).then(done())
+			.catch((error) => console.error error)
 	)
 	it('should add closest colors to the database', (done) =>
 		flossColorId = '589e049c40dad83122a9f6d5'
 		chai.request(app)
-			.get("/api/cousins?_id=#{flossColorId}")
+			.get("/api/colors/#{flossColorId}/cousins")
 			.then(
 				flossColors = db.get('flossColors')
 				flossColors.findOne({ _id: flossColorId }).then( (flossColor) ->
 					flossColor.should.have.property('cousins')
 				).then(done())
-			)
+			).catch((error) => console.error error)
 	)
 )

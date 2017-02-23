@@ -268,8 +268,8 @@ $('form#search-form').submit( (event, other) ->
 getSearchValuesFromQueryString = (search) ->
 	regExpForField = /\?(.*)\=/
 	regExpForInput = /\=(.*)$/
-	field = regExpForField.exec(search)[1]
-	input = regExpForInput.exec(search)[1]
+	field = regExpForField.exec(search)?[1]
+	input = regExpForInput.exec(search)?[1]
 	if input == ''
 		return {}
 	else if field == '_id'

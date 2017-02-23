@@ -10,6 +10,12 @@ nav.navbar {
 	margin-bottom: 0;
 }
 
+@media (min-width: 400px) {
+	li.nav-item {
+		float: left;
+	}
+}
+
 h2.title {
 	margin: 10px 0 5px;
 	text-align: center;
@@ -80,6 +86,10 @@ button.clear-color-scheme {
 		-0.5px -0.5px 0.5px #888888,
 		0.5px -0.5px 0.5px #888888,
 		-0.5px 0.5px 0.5px #888888;
+}
+
+.color-swatch.small:hover .details {
+	display: block!important;
 }
 
 .details {
