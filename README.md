@@ -1,7 +1,7 @@
 ## Embroidery Floss Color Scheme Tool
 ** work in progress **
 
-A web app built with Node.js and Express.
+A web app built with Node.js, MongoDB and Express.
 
 Converting embroidery floss colors between brands is a pain. Finding similar colors that will fit in your color schem by looking through DMC and Anchor color charts is pretty much impossible. This tool aims to solve those problems.
 
@@ -9,6 +9,7 @@ This project is not yet depoloyed. To run locally:
 1. Clone this repo
 2. Run `npm install`
 3. Run `npm start`
+4. Ensure mongo running and listening at default port 27017
 4. Go to http://localhost:3000/
 
 ### Features
